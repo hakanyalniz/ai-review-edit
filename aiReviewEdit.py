@@ -36,7 +36,9 @@ def prompt_AI(novel_paragraph):
     ] = f"The text to be edited is below:\n\n{novel_paragraph}"
     response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
 
-    return response.json().choices[0]
+    # Return only the edited message content
+    # print(response.json()["choices"][0]["message"]["content"])
+    return response.json()["choices"][0]["message"]["content"]
 
 
 # Read the original book
@@ -72,10 +74,9 @@ for item in original_book.get_items():
 
         # Each parapgrah in the array will be cleaned up and reviewed by the model
         for index in range(len(cleaned_paragraphs)):
-            print(f"Finished paragraph {index}")
             cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
+            print(f"Finished paragraph {index}")
 
-        print(cleaned_paragraphs)
         # Join the cleaned and reviewed paragraphs with newlines
         cleaned_content_string = "\n\n".join(cleaned_paragraphs)
 
