@@ -35,14 +35,12 @@ def prompt_AI(novel_paragraph):
         "content"
     ] = f"The text to be edited is below:\n\n{novel_paragraph}"
     response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
-    print(response.headers["Content-Type"])
 
-    print(response.json())
-    return response
+    return response.json().choices[0]
 
 
 # Read the original book
-original_book = epub.read_epub("./testNovels/MachineEnglish.epub")
+original_book = epub.read_epub("./testNovels/Short_MachineTranslation.epub")
 
 # Create a new book for the stripped content
 stripped_book = epub.EpubBook()
@@ -72,11 +70,12 @@ for item in original_book.get_items():
             if cleaned_text:  # Avoid empty paragraphs
                 cleaned_paragraphs.append(cleaned_text)
 
-        print(prompt_AI("Test my new gun!"))
         # Each parapgrah in the array will be cleaned up and reviewed by the model
-        # for index in range(len(cleaned_paragraphs)):
-        #     cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
+        for index in range(len(cleaned_paragraphs)):
+            print(f"Finished paragraph {index}")
+            cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
 
+        print(cleaned_paragraphs)
         # Join the cleaned and reviewed paragraphs with newlines
         cleaned_content_string = "\n\n".join(cleaned_paragraphs)
 
