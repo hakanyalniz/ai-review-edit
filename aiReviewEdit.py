@@ -1,6 +1,25 @@
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import ebooklib
+import requests
+
+
+PROMPT = (
+    "Revise the provided text to correct grammar, improve flow, and naturalize unnatural phrasing. "
+    "Only reply in the edited text and nothing else."
+)
+
+URL = "http://127.0.0.1:1234/v1/chat/completions"
+HEADERS = {"Content-Type": "application/json"}
+CHAT_REQUEST = {
+    "model": "google/gemma-3-1b",
+    "messages": [
+        {"role": "system", "content": f"{PROMPT}"},
+        {"role": "user", "content": ""},
+    ],
+    "temperature": 0.5,
+    "max_tokens": -1,
+}
 
 
 # Function to remove tags
@@ -9,6 +28,17 @@ def remove_tags(html):
     for data in soup(["style", "script"]):
         data.decompose()
     return " ".join(soup.stripped_strings)
+
+
+def prompt_AI(novel_paragraph):
+    CHAT_REQUEST["messages"][1][
+        "content"
+    ] = f"The text to be edited is below:\n\n{novel_paragraph}"
+    response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
+    print(response.headers["Content-Type"])
+
+    print(response.json())
+    return response
 
 
 # Read the original book
@@ -42,7 +72,12 @@ for item in original_book.get_items():
             if cleaned_text:  # Avoid empty paragraphs
                 cleaned_paragraphs.append(cleaned_text)
 
-        # Join the cleaned paragraphs with newlines
+        print(prompt_AI("Test my new gun!"))
+        # Each parapgrah in the array will be cleaned up and reviewed by the model
+        # for index in range(len(cleaned_paragraphs)):
+        #     cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
+
+        # Join the cleaned and reviewed paragraphs with newlines
         cleaned_content_string = "\n\n".join(cleaned_paragraphs)
 
         # Create a new EpubHtml item with the cleaned content
