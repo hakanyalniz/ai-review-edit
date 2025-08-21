@@ -1,17 +1,11 @@
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import ebooklib
-import sys
 
-from utils import prompt_AI
+from utils import prompt_AI, verify_arguments
 
 
-if len(sys.argv) < 2:
-    print("Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME")
-    sys.exit(1)  # exit code 1 = error
-
-# Short_MachineTranslation.epub
-EBOOK_NAME = sys.argv[1]
+EBOOK_NAME = verify_arguments()
 
 # Read the original book
 original_book = epub.read_epub(f"./testNovels/{EBOOK_NAME}")

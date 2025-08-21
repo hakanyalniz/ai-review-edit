@@ -1,5 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
+import sys
+
 
 URL = "http://127.0.0.1:1234/v1/chat/completions"
 PROMPT = (
@@ -36,3 +38,13 @@ def prompt_AI(novel_input):
     # Return only the edited message content
     # print(response.json()["choices"][0]["message"]["content"])
     return response.json()["choices"][0]["message"]["content"]
+
+
+def verify_arguments():
+    if len(sys.argv) < 2:
+        print("Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME")
+        sys.exit(1)  # exit code 1 = error
+
+    # Short_MachineTranslation.epub
+    EBOOK_NAME = sys.argv[1]
+    return EBOOK_NAME
