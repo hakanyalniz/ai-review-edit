@@ -1,19 +1,28 @@
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import ebooklib
+import sys
 
 from utils import prompt_AI
 
+
+if len(sys.argv) < 2:
+    print("Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME")
+    sys.exit(1)  # exit code 1 = error
+
+# Short_MachineTranslation.epub
+EBOOK_NAME = sys.argv[1]
+
 # Read the original book
-original_book = epub.read_epub("./testNovels/Short_MachineTranslation.epub")
+original_book = epub.read_epub(f"./testNovels/{EBOOK_NAME}")
 
 # Create a new book for the stripped content
-stripped_book = epub.EpubBook()
+edited_new_book = epub.EpubBook()
 
 # Copy metadata from the original book
-stripped_book.set_title(original_book.title)
-stripped_book.add_author(original_book.get_metadata("DC", "creator")[0][0])
-stripped_book.set_language("en")
+edited_new_book.set_title(original_book.title)
+edited_new_book.add_author(original_book.get_metadata("DC", "creator")[0][0])
+edited_new_book.set_language("en")
 
 # Lists to hold new items and chapters
 new_chapters = []
@@ -53,18 +62,18 @@ for item in original_book.get_items():
         new_chapter.content = html_content
 
         # Add the new chapter to the book
-        stripped_book.add_item(new_chapter)
+        edited_new_book.add_item(new_chapter)
         new_chapters.append(new_chapter)
 
     else:
         # Copy non-document items directly (e.g., images, CSS)
-        stripped_book.add_item(item)
+        edited_new_book.add_item(item)
 
 # Set the spine and table of contents
-stripped_book.toc = new_chapters
-stripped_book.spine = ["nav"] + new_chapters
+edited_new_book.toc = new_chapters
+edited_new_book.spine = ["nav"] + new_chapters
 
 # Write the new EPUB file
-epub.write_epub("stripped_novel.epub", stripped_book, {})
+epub.write_epub(f"edited_{EBOOK_NAME}", edited_new_book, {})
 
-print("Stripped EPUB created successfully at 'stripped_novel.epub'")
+print(f"Edited/Translated EPUB created successfully at 'edited_{EBOOK_NAME}'")
