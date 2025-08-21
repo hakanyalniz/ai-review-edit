@@ -40,11 +40,26 @@ def prompt_AI(novel_input):
     return response.json()["choices"][0]["message"]["content"]
 
 
-def verify_arguments():
-    if len(sys.argv) < 2:
-        print("Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME")
-        sys.exit(1)  # exit code 1 = error
+# Each parapgrah in the array will be cleaned up and reviewed by the model
+def prompt_paragraphByParagraph(cleaned_paragraphs):
+    for index in range(len(cleaned_paragraphs)):
+        cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
+        print(f"Finished paragraph {index}")
 
-    # Short_MachineTranslation.epub
-    EBOOK_NAME = sys.argv[1]
-    return EBOOK_NAME
+
+def prompt_chapterByChapter(cleaned_content_string):
+    return prompt_AI(cleaned_content_string)
+
+
+def verify_arguments():
+    if len(sys.argv) < 3:
+        print(
+            """Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME line/chapter
+
+                python: This is required to run the program
+                .\\aiReviewEdit.py: The program name that you run with the python command
+                EBOOK-NAME: The name of the Ebook you wish to edit or translate
+                line/chapter: If you wish to edit/translate either line by line or translate the entire chapter at once
+              """
+        )
+        sys.exit(1)  # exit code 1 = error

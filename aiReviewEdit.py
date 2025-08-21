@@ -1,11 +1,16 @@
 from ebooklib import epub
 from bs4 import BeautifulSoup
 import ebooklib
+import sys
 
-from utils import prompt_AI, verify_arguments
+from utils import prompt_paragraphByParagraph, prompt_chapterByChapter, verify_arguments
 
 
-EBOOK_NAME = verify_arguments()
+# Verify that the number of arguments matches
+verify_arguments()
+# Short_MachineTranslation.epub
+EBOOK_NAME = sys.argv[1]
+EDIT_TYPE = sys.argv[2]
 
 # Read the original book
 original_book = epub.read_epub(f"./testNovels/{EBOOK_NAME}")
@@ -39,12 +44,20 @@ for item in original_book.get_items():
                 cleaned_paragraphs.append(cleaned_text)
 
         # Each parapgrah in the array will be cleaned up and reviewed by the model
-        for index in range(len(cleaned_paragraphs)):
-            cleaned_paragraphs[index] = prompt_AI(cleaned_paragraphs[index])
-            print(f"Finished paragraph {index}")
+        # Or, they will be translated whole as a text
+        if EDIT_TYPE == "line":
+            # This changes cleaned_paragraphs over in the function
+            prompt_paragraphByParagraph(cleaned_paragraphs)
+            # Join the cleaned and reviewed paragraphs with newlines
+            cleaned_content_string = "\n\n".join(cleaned_paragraphs)
 
-        # Join the cleaned and reviewed paragraphs with newlines
-        cleaned_content_string = "\n\n".join(cleaned_paragraphs)
+        elif EDIT_TYPE == "chapter":
+            cleaned_content_string = prompt_chapterByChapter(
+                "\n\n".join(cleaned_paragraphs)
+            )
+        else:
+            # If either of the edit types are not caught, then exit
+            sys.exit(1)
 
         # Create a new EpubHtml item with the cleaned content
         # Note: HTML needs paragraph tags to render correctly
