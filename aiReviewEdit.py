@@ -12,8 +12,13 @@ verify_arguments()
 EBOOK_NAME = sys.argv[1]
 EDIT_TYPE = sys.argv[2]
 
-# Read the original book
-original_book = epub.read_epub(f"./testNovels/{EBOOK_NAME}")
+try:
+    # Read the original book
+    original_book = epub.read_epub(f"{EBOOK_NAME}")
+except FileNotFoundError:
+    print("Please enter a valid file name.")
+    sys.exit(1)
+
 
 # Create a new book for the stripped content
 edited_new_book = epub.EpubBook()
@@ -57,6 +62,7 @@ for item in original_book.get_items():
             )
         else:
             # If either of the edit types are not caught, then exit
+            print("Please enter a valid process type, either 'line' or 'chapter'.")
             sys.exit(1)
 
         # Create a new EpubHtml item with the cleaned content
