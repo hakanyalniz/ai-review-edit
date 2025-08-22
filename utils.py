@@ -10,7 +10,6 @@ PROMPT = (
 )
 HEADERS = {"Content-Type": "application/json"}
 CHAT_REQUEST = {
-    "model": "google/gemma-3-1b",
     "messages": [
         {"role": "system", "content": f"{PROMPT}"},
         {"role": "user", "content": ""},
@@ -52,7 +51,25 @@ def prompt_chapterByChapter(cleaned_content_string):
 
 
 def verify_arguments():
-    if len(sys.argv) < 3:
+    if sys.argv[1] == "help":
+        print(
+            """
+                HOW TO RUN:
+                Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME line/chapter
+
+                python: This is required to run the program
+                .\\aiReviewEdit.py: The program name that you run with the python command
+                EBOOK-NAME: The name of the Ebook you wish to edit or translate
+                line/chapter: If you wish to edit/translate either line by line or translate the entire chapter at once
+
+
+                USAGE:
+                Open up LMStudio and load the model you want to use. I suggest using at least 4B models and up for consistent results.
+              """
+        )
+        sys.exit(1)
+
+    elif len(sys.argv) < 3:
         print(
             """Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME line/chapter
 

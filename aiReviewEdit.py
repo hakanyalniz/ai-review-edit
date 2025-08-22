@@ -5,7 +5,6 @@ import sys
 
 from utils import prompt_paragraphByParagraph, prompt_chapterByChapter, verify_arguments
 
-
 # Verify that the number of arguments matches
 verify_arguments()
 # Short_MachineTranslation.epub
