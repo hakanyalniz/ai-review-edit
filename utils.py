@@ -51,10 +51,10 @@ def verify_arguments():
 # Decides the prompt based on the user given argument
 def _define_prompt():
     verify_arguments()
-    if sys.argv[2] == "translate":
-        PROMPT = EDIT_PROMPT
-    elif sys.argv[2] == "edit":
+    if sys.argv[1] == "translate":
         PROMPT = TRANSLATION_PROMPT
+    elif sys.argv[1] == "edit":
+        PROMPT = EDIT_PROMPT
     else:
         print("Please enter a valid process. Either 'translate' or 'edit'.")
         sys.exit(1)
@@ -87,7 +87,11 @@ def _prompt_AI(novel_input):
     CHAT_REQUEST["messages"][1][
         "content"
     ] = f"The text is given below:\n\n{novel_input}"
-    response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
+    try:
+        response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
+    except requests.exceptions.ConnectionError:
+        print("Please connect to LMStudio.")
+        sys.exit(1)
 
     # Return only the edited message content
     # print(response.json()["choices"][0]["message"]["content"])

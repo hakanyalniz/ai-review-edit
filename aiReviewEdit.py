@@ -8,8 +8,8 @@ from utils import prompt_paragraphByParagraph, prompt_chapterByChapter, verify_a
 # Verify that the number of arguments matches
 verify_arguments()
 # Short_MachineTranslation.epub
-EBOOK_NAME = sys.argv[1]
-EDIT_TYPE = sys.argv[2]
+EBOOK_NAME = sys.argv[2]
+EDIT_TYPE = sys.argv[3]
 
 try:
     # Read the original book
@@ -32,7 +32,8 @@ new_chapters = []
 
 # Process content items
 for item in original_book.get_items():
-    if item.get_type() == ebooklib.ITEM_DOCUMENT:
+    # Temporarily disabled reviewing TOC or translating it
+    if item.get_type() == ebooklib.ITEM_DOCUMENT and "toc" not in item.file_name.lower():
         # Parse the content of the current chapter
         soup = BeautifulSoup(item.get_content(), "html.parser")
 
