@@ -2,16 +2,14 @@ import requests
 from bs4 import BeautifulSoup
 import sys
 
+from prompts import EDIT_PROMPT, TRANSLATION_PROMPT
+
 
 URL = "http://127.0.0.1:1234/v1/chat/completions"
-PROMPT = (
-    "Revise the provided text to correct grammar, improve flow, and naturalize unnatural phrasing. "
-    "Only reply in the edited text and nothing else."
-)
 HEADERS = {"Content-Type": "application/json"}
 CHAT_REQUEST = {
     "messages": [
-        {"role": "system", "content": f"{PROMPT}"},
+        {"role": "system", "content": f"{EDIT_PROMPT}"},
         {"role": "user", "content": ""},
     ],
     "temperature": 0.5,
