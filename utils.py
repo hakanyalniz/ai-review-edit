@@ -51,7 +51,7 @@ def prompt_chapterByChapter(cleaned_content_string):
 
 
 def verify_arguments():
-    if sys.argv[1] == "help":
+    if len(sys.argv) > 1 and sys.argv[1] == "help":
         print(
             """
                 HOW TO RUN:
@@ -65,18 +65,26 @@ def verify_arguments():
 
                 USAGE:
                 Open up LMStudio and load the model you want to use. I suggest using at least 4B models and up for consistent results.
+                1B models can still work for editing and fixing the grammar, but the output will be unstable.
+                4B and up is the best for editing and translation.
+
+                Gemma 3 and Qwen3 models are reccommended due to their low cost and highly effective outputs.
               """
         )
         sys.exit(1)
 
     elif len(sys.argv) < 3:
         print(
-            """Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME line/chapter
+            """
+                Please enter arguments like so: python .\\aiReviewEdit.py EBOOK-NAME line/chapter
 
                 python: This is required to run the program
                 .\\aiReviewEdit.py: The program name that you run with the python command
                 EBOOK-NAME: The name of the Ebook you wish to edit or translate
                 line/chapter: If you wish to edit/translate either line by line or translate the entire chapter at once
+
+                COMMANDS:
+                help: Will show the above text along side with USAGE text.
               """
         )
         sys.exit(1)  # exit code 1 = error
