@@ -32,13 +32,18 @@ new_chapters = []
 
 # Process content items
 for item in original_book.get_items():
-    # Temporarily disabled reviewing TOC or translating it
-    if item.get_type() == ebooklib.ITEM_DOCUMENT and "toc" not in item.file_name.lower():
+    if item.get_type() == ebooklib.ITEM_DOCUMENT:
         # Parse the content of the current chapter
         soup = BeautifulSoup(item.get_content(), "html.parser")
 
-        # Find all paragraph tags and extract their text
         paragraphs = soup.find_all("p")
+
+        # Check if the current chapter, given by the tag p from soup, is empty or not
+        if (len(paragraphs) == 0):
+            print("Content is empty")
+            break
+
+        # Find all paragraph tags and extract their text
         cleaned_paragraphs = []
         for p in paragraphs:
             # Use get_text() for individual paragraphs, then strip whitespace
