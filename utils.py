@@ -1,9 +1,17 @@
 import requests
 from bs4 import BeautifulSoup
 import sys
+import queue
+
+import threading
+import time
 
 from prompts import EDIT_PROMPT, TRANSLATION_PROMPT
 
+# Create a queue to hold the result of the network request
+request_queue = queue.Queue()
+# Global flag to signal the spinner to stop
+done = False
 
 # Verifies if the user entered the correct arguments and if not, how to enter them
 def verify_arguments():
@@ -47,6 +55,25 @@ def verify_arguments():
         )
         sys.exit(1)  # exit code 1 = error
 
+# Spinner function that shows spinning animation on console
+def spinner():
+    """
+    Displays a spinning line while the task runs.
+    """
+    global done
+    # Create the spinner sequence.
+    spin_chars = ['-', '\\', '|', '/']
+    print("Processing...")
+    while not done:
+        for char in spin_chars:
+            # Print the character without a newline, then move the cursor back.
+            sys.stdout.write(char)
+            sys.stdout.flush()
+            time.sleep(0.1)  # Control the spinner speed
+            sys.stdout.write('\b') # Move cursor back
+    
+    done = False
+
 
 # Decides the prompt based on the user given argument
 def _define_prompt():
@@ -82,15 +109,52 @@ def _remove_tags(html):
     return " ".join(soup.stripped_strings)
 
 
+def start_thread(novel_input):
+    """
+    Main function to run the process.
+    """
+    # Create and start the thread for the long task.
+    task_thread = threading.Thread(target=_prompt_AI, args=(novel_input,))
+    task_thread.start()
+
+    # Start the spinner in the main thread.
+    spinner()
+
+    # Check the queue for the result
+    try:
+        # Get the result from the queue, with a timeout
+        result = request_queue.get(timeout=10)
+        
+        if isinstance(result, requests.Response):
+            return result.json()["choices"][0]["message"]["content"]
+        else:
+            print(f"Request failed: {result}")
+            sys.exit(1)
+
+    except queue.Empty:
+        print("Network request timed out.")
+
+    # Join the thread to ensure the main program waits for it to finish.
+    task_thread.join()
+
+  
 # Send a request to the backend AI Model with the text input to edit/translate
 def _prompt_AI(novel_input):
+    global done
     CHAT_REQUEST["messages"][1][
         "content"
     ] = f"The text is given below:\n\n{novel_input}"
     try:
         response = requests.post(URL, json=CHAT_REQUEST, headers=HEADERS)
-    except requests.exceptions.ConnectionError:
+        # Put the response object into the queue
+        request_queue.put(response)
+
+        done = True
+
+    except requests.exceptions.ConnectionError as e:
         print("Please connect to LMStudio.")
+        # Put the exception object into the queue on failure
+        request_queue.put(e)
         sys.exit(1)
 
     # Return only the edited message content
@@ -101,10 +165,10 @@ def _prompt_AI(novel_input):
 # Each parapgrah in the array will be cleaned up and reviewed by the model
 def prompt_paragraphByParagraph(cleaned_paragraphs):
     for index in range(len(cleaned_paragraphs)):
-        cleaned_paragraphs[index] = _prompt_AI(cleaned_paragraphs[index])
+        cleaned_paragraphs[index] = start_thread(cleaned_paragraphs[index])
         print(f"Finished paragraph {index}")
 
 
 # The prompt will process the chapter whole instead of by paragraph
 def prompt_chapterByChapter(cleaned_content_string):
-    return _prompt_AI(cleaned_content_string)
+    return start_thread(cleaned_content_string)
